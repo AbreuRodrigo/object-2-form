@@ -14,6 +14,8 @@ namespace O2F
 
 		private Vector2 previousContentSize;
 
+		public object TemplateObject { get; set; }
+
 		private void Start()
 		{
 			if(addButton != null)
@@ -36,7 +38,11 @@ namespace O2F
 
 		private void OnAddElement()
 		{
-
+			if (TemplateObject != null)
+			{
+				Object2Form.Instance.ConvertObjectToFormUIs(TemplateObject, listContent, false);
+				UpdateRect();
+			}
 		}
 
 		public void UpdateRect()
@@ -45,8 +51,6 @@ namespace O2F
 
 			Vector2 diff = previousContentSize - listContent.sizeDelta;
 			rectTransform.sizeDelta += diff;
-			//rectTransform.ForceUpdateRectTransforms();
-
 			UpdatePreviousContentSizeDelta();
 		}
 

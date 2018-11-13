@@ -23,20 +23,17 @@ public class Object2FormTest : MonoBehaviour
 		player.controlledByBot = true;
 		player.isAlive = true;
 
-		//player.items.Add(new Item("Shield", 10));
-		//player.items.Add(new Item("Sword", 5));
-		//player.items.Add(new Item("Helmut", 1));
+		player.items.Add(new Item("Shield", 10, 0, 10, ItemCategory.Shield));
+		player.items.Add(new Item("Sword", 5, 10, 10, ItemCategory.Weapon));
+		player.items.Add(new Item("Helmut", 1, 0, 5, ItemCategory.Armor));
 
-		player.items.Add("Shield");
-		player.items.Add("Sword");
-		player.items.Add("Helmut");
-
-		player.friends.Add("Friend 1");
-		player.friends.Add("Friend 2");
-		player.friends.Add("Friend 3");
-		player.friends.Add("Friend 4");
+		//player.items.Add("Shield");
+		//player.items.Add("Sword");
+		//player.items.Add("Helmut");
 
 		Object2Form.Instance.CreateEditForm(player);
+
+		//Object2Form.Instance.CreateNewForm<Player>();
 	}
 
 	private void CreateItemEditForm()

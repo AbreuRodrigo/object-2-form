@@ -6,8 +6,9 @@ using O2F;
 public enum ItemCategory
 {
 	Weapon,
-	Potion,
+	Armor,
 	Shield,
+	Potion,
 	Book,
 	Food
 }
@@ -24,4 +25,15 @@ public class Item
 	public int resistance;
 	[DropDown]
 	public ItemCategory category;
+
+	public Item() { }
+
+	public Item(string name, float price, int damage, int resistance, ItemCategory category)
+	{
+		this.name = name;
+		this.price = price;
+		this.damage = damage;
+		this.resistance = resistance;
+		this.category = category;
+	}
 }

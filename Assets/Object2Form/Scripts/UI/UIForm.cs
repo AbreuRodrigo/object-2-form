@@ -9,7 +9,7 @@ namespace O2F
 	public class UIForm : MonoBehaviour
 	{
 		[SerializeField]
-		private Text formTitle;
+		private Text formHeader;
 
 		[SerializeField]
 		private RectTransform formBody;
@@ -25,9 +25,9 @@ namespace O2F
 
 		public void SetTitleText(string titleText)
 		{
-			if (formTitle != null)
+			if (formHeader != null)
 			{
-				formTitle.text = titleText;
+				formHeader.text = titleText;
 			}
 		}
 
@@ -85,6 +85,29 @@ namespace O2F
 			if (checkBoxes != null)
 			{
 				checkBoxes.Add(uiCheckBox);
+			}
+		}
+
+		public void AddUIComponent(UIComponent uiComponent)
+		{
+			if(uiComponent != null)
+			{
+				if(uiComponent is UITextField)
+				{
+					AddUIComponent(uiComponent as UITextField);
+				}
+				else if(uiComponent is UIDropDown)
+				{
+					AddUIComponent(uiComponent as UIDropDown);
+				}
+				else if (uiComponent is UICheckBox)
+				{
+					AddUIComponent(uiComponent as UICheckBox);
+				}
+				else if (uiComponent is UIListElement)
+				{
+					AddUIComponent(uiComponent as UIListElement);
+				}
 			}
 		}
 

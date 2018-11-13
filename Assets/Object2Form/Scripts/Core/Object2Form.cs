@@ -26,35 +26,46 @@ namespace O2F
 			Instance = this;
 		}
 
-		public void CreateEditForm(object sourceObject)
+		public void CreateEditForm(object templateObject)
 		{
-			if (sourceObject != null)
+			if (templateObject != null)
 			{
-				FieldInfo[] fields = sourceObject.GetType().GetFields(
-					BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-				uiFormInstance = Instance.CreateUIForm(sourceObject.GetType().Name);
+				//uiForm
+				uiFormInstance = CreateUIForm(templateObject.GetType().Name);
 
 				if (uiFormInstance != null)
 				{
-					uiFormInstance.SetReferenceObject(sourceObject);
-
-					//All the fields in the sourceObject
-					foreach (FieldInfo field in fields)
-					{
-						string fieldName = field.Name;
-						
-						fieldName = fieldName.Replace("<", string.Empty);
-						fieldName = fieldName.Replace(">", string.Empty);
-
-						fieldName = Instance.CapitalizeFirstLetter(fieldName);
-
-						ProcessTextFieldAttribute(field, fieldName, sourceObject, uiFormInstance.FormBody);
-						ProcessCheckBoxAttribute(field, fieldName, sourceObject, uiFormInstance.FormBody);
-						ProcessDropDown(field, fieldName, uiFormInstance.FormBody);
-						ProcessListElement(field, fieldName, sourceObject, uiFormInstance.FormBody);
-					}
+					uiFormInstance.SetReferenceObject(templateObject);
+					ConvertObjectToFormUIs(templateObject, uiFormInstance.FormBody, true);
 				}
+			}
+		}
+
+		public void CreateNewForm<T>() where T : class, new()
+		{
+			T instance = new T();
+			CreateEditForm(instance);
+		}
+
+		public void ConvertObjectToFormUIs(object templateObject, RectTransform parent, bool addToForm)
+		{
+			FieldInfo[] fields = templateObject.GetType().GetFields(
+				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			//All the fields in the templateObject
+			foreach (FieldInfo field in fields)
+			{
+				string fieldName = field.Name;
+
+				fieldName = fieldName.Replace("<", string.Empty);
+				fieldName = fieldName.Replace(">", string.Empty);
+
+				fieldName = CapitalizeFirstLetter(fieldName);
+
+				ProcessTextFieldAttribute(field, fieldName, templateObject, parent, addToForm);
+				ProcessCheckBoxAttribute(field, fieldName, templateObject, parent, addToForm);
+				ProcessDropDown(field, fieldName, parent, addToForm);
+				ProcessListElement(field, fieldName, templateObject, parent, addToForm);
 			}
 		}
 
@@ -154,49 +165,67 @@ namespace O2F
 			return originalText.Replace("(Clone)", string.Empty);
 		}
 
-		private void ProcessTextFieldAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessTextFieldAttribute(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			TextFieldAttribute textFieldAttr = Instance.ExtractAttributeFromFieldInfo<TextFieldAttribute>(field);
+			TextFieldAttribute textFieldAttr = ExtractAttributeFromFieldInfo<TextFieldAttribute>(field);
 
 			if (textFieldAttr != null)
 			{
-				string fieldValue = field.GetValue(sourceObject).ToString();
+				string fieldValue = string.Empty;
+				object objValue = field.GetValue(templateObject);
 
-				UITextField uiTextField = Instance.CreateUIComponent<UITextField>(Instance.uiTextFieldPrefab,
+				if (objValue != null)
+				{
+					fieldValue = objValue.ToString();
+				}
+
+				UITextField uiTextField = CreateUIComponent<UITextField>(uiTextFieldPrefab,
 					fieldName, fieldValue, parent);
 
 				if (textFieldAttr != null)
 				{
-					uiTextField.SetReadOnly(textFieldAttr.readOnly);
+					uiTextField.SetReadOnly(string.IsNullOrEmpty(fieldValue) ? false : textFieldAttr.readOnly);
 					uiTextField.SetContentType(textFieldAttr.textFieldType);
 				}
 
-				uiFormInstance.AddUIComponent(uiTextField);
+				if (addToForm)
+				{
+					uiFormInstance.AddUIComponent(uiTextField);
+				}
 			}
 		}
 
-		private void ProcessCheckBoxAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessCheckBoxAttribute(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			CheckBoxAttribute checkBoxAttr = Instance.ExtractAttributeFromFieldInfo<CheckBoxAttribute>(field);
+			CheckBoxAttribute checkBoxAttr = ExtractAttributeFromFieldInfo<CheckBoxAttribute>(field);
 
 			if (checkBoxAttr != null)
 			{
-				string fieldValue = field.GetValue(sourceObject).ToString();
+				string fieldValue = string.Empty;
+				object objValue = field.GetValue(templateObject);
 
-				UICheckBox uiCheckBox = Instance.CreateUIComponent<UICheckBox>(Instance.uiCheckBoxPrefab,
+				if (objValue != null)
+				{
+					fieldValue = objValue.ToString();
+				}
+
+				UICheckBox uiCheckBox = CreateUIComponent<UICheckBox>(uiCheckBoxPrefab,
 					fieldName, fieldValue, parent);
 
-				uiFormInstance.AddUIComponent(uiCheckBox);
+				if (addToForm)
+				{
+					uiFormInstance.AddUIComponent(uiCheckBox);
+				}
 			}
 		}
 
-		private void ProcessDropDown(FieldInfo field, string fieldName, RectTransform parent)
+		private void ProcessDropDown(FieldInfo field, string fieldName, RectTransform parent, bool addToForm)
 		{
-			DropDownAttribute dropDrownAttr = Instance.ExtractAttributeFromFieldInfo<DropDownAttribute>(field);
+			DropDownAttribute dropDrownAttr = ExtractAttributeFromFieldInfo<DropDownAttribute>(field);
 
 			if (dropDrownAttr != null)
 			{
-				UIDropDown uiDropDown = Instance.CreateUIComponent<UIDropDown>(Instance.uiDropDownPrefab,
+				UIDropDown uiDropDown = CreateUIComponent<UIDropDown>(uiDropDownPrefab,
 					fieldName, string.Empty, parent);
 
 				if (uiDropDown != null)
@@ -214,31 +243,45 @@ namespace O2F
 					}
 				}
 
-				uiFormInstance.AddUIComponent(uiDropDown);
+				if (addToForm)
+				{
+					uiFormInstance.AddUIComponent(uiDropDown);
+				}
 			}
 		}
 
-		private void ProcessListElement(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessListElement(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			ListElementAttribute listElementAttr = Instance.ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
+			ListElementAttribute listElementAttr = ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
 			
 			if (listElementAttr != null)
 			{
-				UIListElement uiListElement = Instance.CreateUIListElement(fieldName, parent);
+				UIListElement uiListElement = CreateUIListElement(fieldName, parent);
 
 				if (uiListElement != null)
-				{
-					var listFieldValue = field.GetValue(sourceObject);
+				{					
+					object listFieldValue = field.GetValue(templateObject);
 
 					if (typeof(IList).IsAssignableFrom(field.FieldType))
 					{
 						IList list = listFieldValue as IList;
+						Type listElementType = GetElementTypeOfEnumerable(field.FieldType);
+
+						if (listElementType != null)
+						{
+							if (listElementType.IsPrimitive)
+							{
+								
+							}
+							else
+							{
+								uiListElement.TemplateObject = Activator.CreateInstance(listElementType);
+							}
+						}
 
 						for (int i = 0; i < list.Count; i++)
 						{
 							var item = list[i];
-							var itemType = item.GetType();
-
 							string itemName = fieldName;
 
 							//Is using plural name?
@@ -247,7 +290,7 @@ namespace O2F
 								itemName = itemName.Substring(0, fieldName.Length - 1) + "_" + (i + 1);
 							}
 
-							UITextField uiTextFieldListElement = Instance.CreateUIComponent<UITextField>(Instance.uiTextFieldPrefab,
+							UITextField uiTextFieldListElement = CreateUIComponent<UITextField>(uiTextFieldPrefab,
 								itemName, item.ToString(), uiListElement.listContent);
 
 							if (uiTextFieldListElement != null)
@@ -259,9 +302,21 @@ namespace O2F
 						}
 					}
 
-					uiFormInstance.AddUIComponent(uiListElement);
+					if (addToForm)
+					{
+						uiFormInstance.AddUIComponent(uiListElement);
+					}
 				}
 			}
+		}
+
+		private static Type GetElementTypeOfEnumerable(Type type)
+		{
+			Type[] interfaces = type.GetInterfaces();
+
+			return interfaces
+				.Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+				.Select(x => x.GetGenericArguments()[0]).FirstOrDefault();
 		}
 
 		public void UpdateListElements()

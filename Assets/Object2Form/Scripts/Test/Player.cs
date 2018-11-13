@@ -40,8 +40,5 @@ public class Player
 	public bool isAlive;
 
 	[ListElement]
-	public List<string> items = new List<string>();
-
-	[ListElement]
-	public List<string> friends = new List<string>();
+	public List<Item> items = new List<Item>();
 }
