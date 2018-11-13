@@ -87,7 +87,14 @@ namespace O2F
 
 		private void OnDeleteInList()
 		{
-			Destroy(gameObject);
+			TweenManager.Instance.ValueTransition(1, 0, 0.5f, TweenType.BackIn, true, null, (float v) => {
+				Vector3 scale = gameObject.transform.localScale;
+				scale.y = v;
+				gameObject.transform.localScale = scale;				
+			}, ()=> {
+				Destroy(gameObject);
+				Object2Form.Instance.UpdateListElements();
+			});						
 		}
 	}
 }

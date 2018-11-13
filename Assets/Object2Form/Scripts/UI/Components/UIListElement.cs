@@ -8,8 +8,11 @@ namespace O2F
 	public class UIListElement : UIComponent
 	{
 		public Text listTitle;
-		public RectTransform listContent;
 		public Button addButton;
+		public RectTransform listContent;
+		public RectTransform rectTransform;
+
+		private Vector2 previousContentSize;
 
 		private void Start()
 		{
@@ -17,6 +20,8 @@ namespace O2F
 			{
 				addButton.onClick.AddListener(OnAddElement);
 			}
+
+			UpdatePreviousContentSizeDelta();
 		}
 
 		public void AddComponent(UIComponent component)
@@ -25,11 +30,29 @@ namespace O2F
 			{
 				component.transform.SetParent(listContent);
 			}
+
+			UpdatePreviousContentSizeDelta();
 		}
 
 		private void OnAddElement()
 		{
 
+		}
+
+		public void UpdateRect()
+		{
+			listContent.sizeDelta = listContent.sizeDelta;
+
+			Vector2 diff = previousContentSize - listContent.sizeDelta;
+			rectTransform.sizeDelta += diff;
+			//rectTransform.ForceUpdateRectTransforms();
+
+			UpdatePreviousContentSizeDelta();
+		}
+
+		private void UpdatePreviousContentSizeDelta()
+		{
+			previousContentSize = listContent.sizeDelta;
 		}
 	}
 }

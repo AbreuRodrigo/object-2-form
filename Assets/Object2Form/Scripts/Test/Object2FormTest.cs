@@ -31,7 +31,12 @@ public class Object2FormTest : MonoBehaviour
 		player.items.Add("Sword");
 		player.items.Add("Helmut");
 
-		O2F.Object2Form.CreateEditForm(player);
+		player.friends.Add("Friend 1");
+		player.friends.Add("Friend 2");
+		player.friends.Add("Friend 3");
+		player.friends.Add("Friend 4");
+
+		Object2Form.Instance.CreateEditForm(player);
 	}
 
 	private void CreateItemEditForm()
@@ -43,6 +48,6 @@ public class Object2FormTest : MonoBehaviour
 		item.damage = 5;
 		item.category = ItemCategory.Weapon;
 
-		O2F.Object2Form.CreateEditForm(item);
+		Object2Form.Instance.CreateEditForm(item);
 	}
 }

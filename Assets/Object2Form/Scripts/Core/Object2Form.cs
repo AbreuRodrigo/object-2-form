@@ -9,33 +9,35 @@ namespace O2F
 {
 	public class Object2Form : MonoBehaviour
 	{
-		private static Object2Form Instance { get; set; }
+		public static Object2Form Instance { get; private set; }
 
 		[Header("Prefabs")]
 		public UIForm uiFormPrefab;
-		public UIFormTitle uiFormTitlePrefab;
 		public UITextField uiTextFieldPrefab;
 		public UICheckBox uiCheckBoxPrefab;
 		public UIDropDown uiDropDownPrefab;
 		public UIListElement uiListElementPrefab;
 
+		[Header("Instances")]
+		public UIForm uiFormInstance;
+
 		private void Awake()
-		{
+		{			
 			Instance = this;
 		}
 
-		public static void CreateEditForm(object sourceObject)
+		public void CreateEditForm(object sourceObject)
 		{
 			if (sourceObject != null)
 			{
 				FieldInfo[] fields = sourceObject.GetType().GetFields(
 					BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-				UIForm uiForm = Instance.CreateUIForm(sourceObject.GetType().Name);
+				uiFormInstance = Instance.CreateUIForm(sourceObject.GetType().Name);
 
-				if (uiForm != null)
+				if (uiFormInstance != null)
 				{
-					uiForm.SetReferenceObject(sourceObject);
+					uiFormInstance.SetReferenceObject(sourceObject);
 
 					//All the fields in the sourceObject
 					foreach (FieldInfo field in fields)
@@ -47,10 +49,10 @@ namespace O2F
 
 						fieldName = Instance.CapitalizeFirstLetter(fieldName);
 
-						ProcessTextFieldAttribute(field, fieldName, sourceObject, uiForm.FormContent);
-						ProcessCheckBoxAttribute(field, fieldName, sourceObject, uiForm.FormContent);
-						ProcessDropDown(field, fieldName, uiForm.FormContent);
-						ProcessListElement(field, fieldName, sourceObject, uiForm.FormContent);
+						ProcessTextFieldAttribute(field, fieldName, sourceObject, uiFormInstance.FormBody);
+						ProcessCheckBoxAttribute(field, fieldName, sourceObject, uiFormInstance.FormBody);
+						ProcessDropDown(field, fieldName, uiFormInstance.FormBody);
+						ProcessListElement(field, fieldName, sourceObject, uiFormInstance.FormBody);
 					}
 				}
 			}
@@ -64,16 +66,10 @@ namespace O2F
 			{
 				uiForm = Instantiate(uiFormPrefab, transform);
 
-				if (!string.IsNullOrEmpty(title) && uiFormTitlePrefab != null && uiForm != null)
+				if (!string.IsNullOrEmpty(title) && uiForm != null)
 				{
 					uiForm.name = RemoveCloneMarkerFromString(uiForm.name) + title;
-
-					UIFormTitle uiFormTitle = Instantiate(uiFormTitlePrefab, uiForm.FormContent);
-
-					uiFormTitle.name = RemoveCloneMarkerFromString(uiFormTitle.name);
-
-					uiFormTitle.SetTitleText(title);
-					uiForm.SetFormTitle(uiFormTitle);
+					uiForm.SetTitleText(title);
 				}
 			}
 
@@ -158,7 +154,7 @@ namespace O2F
 			return originalText.Replace("(Clone)", string.Empty);
 		}
 
-		private static void ProcessTextFieldAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessTextFieldAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
 		{
 			TextFieldAttribute textFieldAttr = Instance.ExtractAttributeFromFieldInfo<TextFieldAttribute>(field);
 
@@ -174,10 +170,12 @@ namespace O2F
 					uiTextField.SetReadOnly(textFieldAttr.readOnly);
 					uiTextField.SetContentType(textFieldAttr.textFieldType);
 				}
+
+				uiFormInstance.AddUIComponent(uiTextField);
 			}
 		}
 
-		private static void ProcessCheckBoxAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessCheckBoxAttribute(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
 		{
 			CheckBoxAttribute checkBoxAttr = Instance.ExtractAttributeFromFieldInfo<CheckBoxAttribute>(field);
 
@@ -187,10 +185,12 @@ namespace O2F
 
 				UICheckBox uiCheckBox = Instance.CreateUIComponent<UICheckBox>(Instance.uiCheckBoxPrefab,
 					fieldName, fieldValue, parent);
+
+				uiFormInstance.AddUIComponent(uiCheckBox);
 			}
 		}
 
-		private static void ProcessDropDown(FieldInfo field, string fieldName, RectTransform parent)
+		private void ProcessDropDown(FieldInfo field, string fieldName, RectTransform parent)
 		{
 			DropDownAttribute dropDrownAttr = Instance.ExtractAttributeFromFieldInfo<DropDownAttribute>(field);
 
@@ -213,10 +213,12 @@ namespace O2F
 						uiDropDown.SetOption(enumValue.ToString());
 					}
 				}
+
+				uiFormInstance.AddUIComponent(uiDropDown);
 			}
 		}
 
-		private static void ProcessListElement(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
+		private void ProcessListElement(FieldInfo field, string fieldName, object sourceObject, RectTransform parent)
 		{
 			ListElementAttribute listElementAttr = Instance.ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
 			
@@ -252,9 +254,21 @@ namespace O2F
 							{
 								uiTextFieldListElement.EnableDeleteButton();
 							}
+
+							uiListElement.AddComponent(uiTextFieldListElement);
 						}
 					}
+
+					uiFormInstance.AddUIComponent(uiListElement);
 				}
+			}
+		}
+
+		public void UpdateListElements()
+		{
+			if(uiFormInstance != null)
+			{
+				uiFormInstance.UpdateListElements();
 			}
 		}
 	}

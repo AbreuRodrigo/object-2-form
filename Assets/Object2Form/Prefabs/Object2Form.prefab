@@ -57,9 +57,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1820f9f9913707641828009fae507581, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rectTransform: {fileID: 224153050041102686}
   uiFormPrefab: {fileID: 114410722331673928, guid: b86b4a4882b9f54439639c95e0daae5f,
-    type: 2}
-  uiFormTitlePrefab: {fileID: 114496066800799566, guid: faf7b35190a195042baca52e7d9588f4,
     type: 2}
   uiTextFieldPrefab: {fileID: 114063070779751072, guid: 5613fa4a7bfc08549a5dd9e5e12c66ea,
     type: 2}

@@ -41,4 +41,7 @@ public class Player
 
 	[ListElement]
 	public List<string> items = new List<string>();
+
+	[ListElement]
+	public List<string> friends = new List<string>();
 }
