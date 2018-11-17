@@ -30,6 +30,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1558098751956950
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4598786876681326}
+  - component: {fileID: 114686166905907914}
+  m_Layer: 0
+  m_Name: UIComponentFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4598786876681326
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1558098751956950}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -300, y: -512, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 224153050041102686}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114018196553873630
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -57,7 +86,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1820f9f9913707641828009fae507581, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rectTransform: {fileID: 224153050041102686}
   uiFormPrefab: {fileID: 114410722331673928, guid: b86b4a4882b9f54439639c95e0daae5f,
     type: 2}
   uiTextFieldPrefab: {fileID: 114063070779751072, guid: 5613fa4a7bfc08549a5dd9e5e12c66ea,
@@ -68,6 +96,21 @@ MonoBehaviour:
     type: 2}
   uiListElementPrefab: {fileID: 114761083877405882, guid: 4d5de340241baf84fbbab0ecb78a2564,
     type: 2}
+  uiObjectPrefab: {fileID: 114646153391528258, guid: 2fac1a0a73d266a4aa085b6b874cf409,
+    type: 2}
+  uiFactory: {fileID: 114686166905907914}
+  uiFormInstance: {fileID: 0}
+--- !u!114 &114686166905907914
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1558098751956950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad2a45ecc21f3514aaad57c8c4e68eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114806330369098962
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -118,7 +161,8 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_Children: []
+  m_Children:
+  - {fileID: 4598786876681326}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

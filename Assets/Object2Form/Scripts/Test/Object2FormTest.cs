@@ -22,14 +22,23 @@ public class Object2FormTest : MonoBehaviour
 		player.strength = 10;
 		player.controlledByBot = true;
 		player.isAlive = true;
+		player.characterClass = CharacterClass.Rogue;
 
 		player.items.Add(new Item("Shield", 10, 0, 10, ItemCategory.Shield));
 		player.items.Add(new Item("Sword", 5, 10, 10, ItemCategory.Weapon));
 		player.items.Add(new Item("Helmut", 1, 0, 5, ItemCategory.Armor));
 
+		//player.items.Add(CharacterClass.Wizard);
+		//player.items.Add(CharacterClass.Warrior);
+
 		//player.items.Add("Shield");
 		//player.items.Add("Sword");
 		//player.items.Add("Helmut");
+		//player.items.Add(10);
+		//player.items.Add(100);
+		//player.items.Add(1000);
+
+		//CreateItemEditForm();
 
 		Object2Form.Instance.CreateEditForm(player);
 

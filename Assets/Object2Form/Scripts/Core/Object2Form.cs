@@ -17,10 +17,14 @@ namespace O2F
 		public UICheckBox uiCheckBoxPrefab;
 		public UIDropDown uiDropDownPrefab;
 		public UIListElement uiListElementPrefab;
+		public UIObject uiObjectPrefab;
+
+		[Header("Components")]
+		public UIComponentFactory uiFactory;
 
 		[Header("Instances")]
 		public UIForm uiFormInstance;
-
+		
 		private void Awake()
 		{			
 			Instance = this;
@@ -30,7 +34,7 @@ namespace O2F
 		{
 			if (templateObject != null)
 			{
-				//uiForm
+				//Current UI Form
 				uiFormInstance = CreateUIForm(templateObject.GetType().Name);
 
 				if (uiFormInstance != null)
@@ -57,14 +61,12 @@ namespace O2F
 			{
 				string fieldName = field.Name;
 
-				fieldName = fieldName.Replace("<", string.Empty);
-				fieldName = fieldName.Replace(">", string.Empty);
-
-				fieldName = CapitalizeFirstLetter(fieldName);
+				fieldName = Utils.ClearGenericNaming(fieldName);
+				fieldName = Utils.CapitalizeFirstLetter(fieldName);
 
 				ProcessTextFieldAttribute(field, fieldName, templateObject, parent, addToForm);
 				ProcessCheckBoxAttribute(field, fieldName, templateObject, parent, addToForm);
-				ProcessDropDown(field, fieldName, parent, addToForm);
+				ProcessDropDown(field, fieldName, templateObject, parent, addToForm);
 				ProcessListElement(field, fieldName, templateObject, parent, addToForm);
 			}
 		}
@@ -79,34 +81,12 @@ namespace O2F
 
 				if (!string.IsNullOrEmpty(title) && uiForm != null)
 				{
-					uiForm.name = RemoveCloneMarkerFromString(uiForm.name) + title;
+					uiForm.name = Utils.RemoveCloneMarkerFromString(uiForm.name) + title;
 					uiForm.SetTitleText(title);
 				}
 			}
 
 			return uiForm;
-		}
-
-		private T CreateUIComponent<T>(Component prefab, string label, string value, Transform parent) where T : UIComponent
-		{
-			T uiComponent = null;
-
-			if (prefab != null)
-			{
-				uiComponent = Instantiate(prefab, parent).GetComponent<T>();
-
-				if (uiComponent != null)
-				{
-					string objectName = RemoveCloneMarkerFromString(uiComponent.name);
-
-					uiComponent.name = objectName + label;
-					uiComponent.SetLabel(label);
-					uiComponent.SetValue(value);
-					uiComponent.SetReadOnly(false);
-				}
-			}
-
-			return uiComponent;
 		}
 
 		private UIListElement CreateUIListElement(string title, Transform parent)
@@ -119,7 +99,7 @@ namespace O2F
 
 				if(uiListElement != null)
 				{
-					string objectName = RemoveCloneMarkerFromString(uiListElement.name);
+					string objectName = Utils.RemoveCloneMarkerFromString(uiListElement.name);
 
 					uiListElement.name = objectName + title;
 					uiListElement.SetLabel(title);
@@ -129,130 +109,64 @@ namespace O2F
 			return uiListElement;
 		}
 
-		private T ExtractAttributeFromFieldInfo<T>(FieldInfo field) where T : Attribute
-		{
-			if(field != null)
-			{
-				foreach (object attr in field.GetCustomAttributes(typeof(T), false))
-				{
-					if(attr is T)
-					{
-						return attr as T;
-					}
-				}
-			}
-
-			return null;
-		}
-
-		private string CapitalizeFirstLetter(string originalText)
-		{
-			if(string.IsNullOrEmpty(originalText))
-			{
-				return null;
-			}
-
-			return originalText.First().ToString().ToUpper() + originalText.Substring(1);
-		}
-
-		private string RemoveCloneMarkerFromString(string originalText)
-		{
-			if (string.IsNullOrEmpty(originalText))
-			{
-				return null;
-			}
-
-			return originalText.Replace("(Clone)", string.Empty);
-		}
-
 		private void ProcessTextFieldAttribute(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			TextFieldAttribute textFieldAttr = ExtractAttributeFromFieldInfo<TextFieldAttribute>(field);
+			TextFieldAttribute textFieldAttr = Utils.ExtractAttributeFromFieldInfo<TextFieldAttribute>(field);
 
 			if (textFieldAttr != null)
 			{
-				string fieldValue = string.Empty;
-				object objValue = field.GetValue(templateObject);
+				object objValue = field?.GetValue(templateObject);
+				string fieldValue = objValue?.ToString();
 
-				if (objValue != null)
-				{
-					fieldValue = objValue.ToString();
-				}
-
-				UITextField uiTextField = CreateUIComponent<UITextField>(uiTextFieldPrefab,
-					fieldName, fieldValue, parent);
+				UITextField uiTextField = uiFactory?.CreateUI<UITextField>(uiTextFieldPrefab, fieldName, fieldValue, parent);
 
 				if (textFieldAttr != null)
 				{
-					uiTextField.SetReadOnly(string.IsNullOrEmpty(fieldValue) ? false : textFieldAttr.readOnly);
-					uiTextField.SetContentType(textFieldAttr.textFieldType);
+					uiTextField?.SetReadOnly(string.IsNullOrEmpty(fieldValue) ? false : textFieldAttr.readOnly);
+					uiTextField?.SetContentType(textFieldAttr.textFieldType);
 				}
 
 				if (addToForm)
 				{
-					uiFormInstance.AddUIComponent(uiTextField);
+					uiFormInstance?.AddUIComponent(uiTextField);
 				}
 			}
 		}
 
 		private void ProcessCheckBoxAttribute(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			CheckBoxAttribute checkBoxAttr = ExtractAttributeFromFieldInfo<CheckBoxAttribute>(field);
+			CheckBoxAttribute checkBoxAttr = Utils.ExtractAttributeFromFieldInfo<CheckBoxAttribute>(field);
 
 			if (checkBoxAttr != null)
 			{
-				string fieldValue = string.Empty;
-				object objValue = field.GetValue(templateObject);
+				object objValue = field?.GetValue(templateObject);
+				string fieldValue = objValue?.ToString();
 
-				if (objValue != null)
-				{
-					fieldValue = objValue.ToString();
-				}
-
-				UICheckBox uiCheckBox = CreateUIComponent<UICheckBox>(uiCheckBoxPrefab,
-					fieldName, fieldValue, parent);
+				UICheckBox uiCheckBox = uiFactory?.CreateUI<UICheckBox>(uiCheckBoxPrefab, fieldName, fieldValue, parent);
 
 				if (addToForm)
 				{
-					uiFormInstance.AddUIComponent(uiCheckBox);
+					uiFormInstance?.AddUIComponent(uiCheckBox);
 				}
 			}
 		}
 
-		private void ProcessDropDown(FieldInfo field, string fieldName, RectTransform parent, bool addToForm)
+		private void ProcessDropDown(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			DropDownAttribute dropDrownAttr = ExtractAttributeFromFieldInfo<DropDownAttribute>(field);
+			DropDownAttribute dropDrownAttr = Utils.ExtractAttributeFromFieldInfo<DropDownAttribute>(field);
 
 			if (dropDrownAttr != null)
-			{
-				UIDropDown uiDropDown = CreateUIComponent<UIDropDown>(uiDropDownPrefab,
-					fieldName, string.Empty, parent);
+			{				
+				object item = field?.GetValue(templateObject);
+				string fieldValue = item?.ToString();
 
-				if (uiDropDown != null)
-				{
-					uiDropDown.ClearOptions();
-
-					Type enumType = field.FieldType;
-					Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
-					Array enumValues = Enum.GetValues(enumType);
-
-					foreach (var enumValue in enumValues)
-					{
-						//object underlyingValue = Convert.ChangeType(enumValue, enumUnderlyingType);
-						uiDropDown.SetOption(enumValue.ToString());
-					}
-				}
-
-				if (addToForm)
-				{
-					uiFormInstance.AddUIComponent(uiDropDown);
-				}
+				CreateUIDropDown(field.FieldType, fieldValue, fieldName, templateObject, parent, addToForm);
 			}
 		}
 
 		private void ProcessListElement(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
-			ListElementAttribute listElementAttr = ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
+			ListElementAttribute listElementAttr = Utils.ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
 			
 			if (listElementAttr != null)
 			{
@@ -265,13 +179,13 @@ namespace O2F
 					if (typeof(IList).IsAssignableFrom(field.FieldType))
 					{
 						IList list = listFieldValue as IList;
-						Type listElementType = GetElementTypeOfEnumerable(field.FieldType);
+						Type listElementType = Utils.GetElementTypeOfEnumerable(field.FieldType);
 
 						if (listElementType != null)
 						{
-							if (listElementType.IsPrimitive)
+							if (listElementType == typeof(String))
 							{
-								
+								uiListElement.TemplateObject = null;
 							}
 							else
 							{
@@ -284,47 +198,78 @@ namespace O2F
 							var item = list[i];
 							string itemName = fieldName;
 
-							//Is using plural name?
 							if ("S".Equals(fieldName.Last().ToString().ToUpper()))
 							{
 								itemName = itemName.Substring(0, fieldName.Length - 1) + "_" + (i + 1);
 							}
 
-							UITextField uiTextFieldListElement = CreateUIComponent<UITextField>(uiTextFieldPrefab,
-								itemName, item.ToString(), uiListElement.listContent);
+							Type typeBinder = TypeUIComponentBinder.GetTypeBySystemType(listElementType);
 
-							if (uiTextFieldListElement != null)
+							if (typeBinder == typeof(UITextField))
 							{
-								uiTextFieldListElement.EnableDeleteButton();
+								UITextField uiTextFieldListElement = uiFactory?.CreateUI<UITextField>(uiTextFieldPrefab,
+									itemName, item.ToString(), uiListElement.listContent);
+
+								uiListElement?.AddComponent(uiTextFieldListElement);
+
+								uiTextFieldListElement?.EnableDeleteButton();
+							}
+							else if (typeBinder == typeof(UICheckBox))
+							{
+							}
+							else if (listElementType.IsEnum)
+							{
+								UIDropDown dropDown = CreateUIDropDown(item?.GetType(), item?.ToString(), itemName, item, uiListElement.listContent, false);
+								uiListElement?.AddComponent(dropDown);
+							}
+							else //When it's an internal object in the form
+							{
+								UIObject uiObjectInstance = uiFactory?.CreateUI<UIObject>(uiObjectPrefab, itemName, uiListElement.listContent);
+
+								uiListElement?.AddComponent(uiObjectInstance);
+
+								ConvertObjectToFormUIs(item, uiObjectInstance.rectTransform, false);
+
+								uiObjectInstance?.EnableDeleteButton();
 							}
 
-							uiListElement.AddComponent(uiTextFieldListElement);
+							//ConvertObjectToFormUIs(item, uiListElement.listContent, false);
+
+							//if (uiTextFieldListElement != null)
+							//{
+							//	uiTextFieldListElement.EnableDeleteButton();
+							//}
+
+							//uiListElement.AddComponent(uiTextFieldListElement);
 						}
 					}
 
 					if (addToForm)
 					{
-						uiFormInstance.AddUIComponent(uiListElement);
+						uiFormInstance?.AddUIComponent(uiListElement);
 					}
 				}
 			}
 		}
 
-		private static Type GetElementTypeOfEnumerable(Type type)
-		{
-			Type[] interfaces = type.GetInterfaces();
-
-			return interfaces
-				.Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-				.Select(x => x.GetGenericArguments()[0]).FirstOrDefault();
-		}
-
 		public void UpdateListElements()
 		{
-			if(uiFormInstance != null)
+			uiFormInstance?.UpdateListElements();
+		}
+
+		private UIDropDown CreateUIDropDown(Type fieldType, string fieldValue, string fieldName, object templateObject, RectTransform parent, bool addToForm)
+		{
+			UIDropDown dropDown = uiFactory?.CreateUI<UIDropDown>(uiDropDownPrefab, fieldName, parent);
+			dropDown?.ClearOptions();
+			dropDown?.CreateOptions(fieldType);
+			dropDown?.SetSelection(fieldValue);
+
+			if (addToForm)
 			{
-				uiFormInstance.UpdateListElements();
+				uiFormInstance?.AddUIComponent(dropDown);
 			}
+
+			return dropDown;
 		}
 	}
 }
