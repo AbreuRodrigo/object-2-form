@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace O2F
 {
@@ -21,7 +20,8 @@ namespace O2F
 				{ typeof(Double), typeof(UITextField) },
 				{ typeof(Char), typeof(UITextField) },
 				{ typeof(Byte), typeof(UITextField) },
-				{ typeof(Boolean), typeof(UICheckBox) }
+				{ typeof(Boolean), typeof(UICheckBox) },
+				{ typeof(Object), typeof(UIObject) }
 			};
 		}
 

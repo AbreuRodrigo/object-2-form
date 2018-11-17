@@ -24,9 +24,9 @@ public class Object2FormTest : MonoBehaviour
 		player.isAlive = true;
 		player.characterClass = CharacterClass.Rogue;
 
-		player.items.Add(new Item("Shield", 10, 0, 10, ItemCategory.Shield));
-		player.items.Add(new Item("Sword", 5, 10, 10, ItemCategory.Weapon));
-		player.items.Add(new Item("Helmut", 1, 0, 5, ItemCategory.Armor));
+		player.items.Add(new Item("Shield", new Price(10, 50), 0, 10, ItemCategory.Shield));
+		player.items.Add(new Item("Sword", new Price(100, 500), 10, 10, ItemCategory.Weapon));
+		player.items.Add(new Item("Helmut", new Price(1, 5), 0, 5, ItemCategory.Armor));
 
 		//player.items.Add(CharacterClass.Wizard);
 		//player.items.Add(CharacterClass.Warrior);
@@ -47,9 +47,11 @@ public class Object2FormTest : MonoBehaviour
 
 	private void CreateItemEditForm()
 	{
+		Price price = new Price(100, 100);
+
 		Item item = new Item();
 		item.name = "Dragon Slayer Sword";
-		item.price = 200;
+		item.price = price;
 		item.resistance = 10;
 		item.damage = 5;
 		item.category = ItemCategory.Weapon;

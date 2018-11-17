@@ -67,6 +67,7 @@ namespace O2F
 				ProcessTextFieldAttribute(field, fieldName, templateObject, parent, addToForm);
 				ProcessCheckBoxAttribute(field, fieldName, templateObject, parent, addToForm);
 				ProcessDropDown(field, fieldName, templateObject, parent, addToForm);
+				ProcessObjectField(field, fieldName, templateObject, parent, addToForm);
 				ProcessListElement(field, fieldName, templateObject, parent, addToForm);
 			}
 		}
@@ -164,6 +165,18 @@ namespace O2F
 			}
 		}
 
+		private void ProcessObjectField(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
+		{
+			ObjectFieldAttribute listElementAttr = Utils.ExtractAttributeFromFieldInfo<ObjectFieldAttribute>(field);
+
+			if (listElementAttr != null)
+			{
+				object item = field?.GetValue(templateObject);
+
+				ProcessObjectField(item, fieldName, field.FieldType, parent);
+			}
+		}
+
 		private void ProcessListElement(FieldInfo field, string fieldName, object templateObject, RectTransform parent, bool addToForm)
 		{
 			ListElementAttribute listElementAttr = Utils.ExtractAttributeFromFieldInfo<ListElementAttribute>(field);
@@ -203,43 +216,13 @@ namespace O2F
 								itemName = itemName.Substring(0, fieldName.Length - 1) + "_" + (i + 1);
 							}
 
-							Type typeBinder = TypeUIComponentBinder.GetTypeBySystemType(listElementType);
-
-							if (typeBinder == typeof(UITextField))
-							{
-								UITextField uiTextFieldListElement = uiFactory?.CreateUI<UITextField>(uiTextFieldPrefab,
-									itemName, item.ToString(), uiListElement.listContent);
-
-								uiListElement?.AddComponent(uiTextFieldListElement);
-
-								uiTextFieldListElement?.EnableDeleteButton();
-							}
-							else if (typeBinder == typeof(UICheckBox))
-							{
-							}
-							else if (listElementType.IsEnum)
-							{
-								UIDropDown dropDown = CreateUIDropDown(item?.GetType(), item?.ToString(), itemName, item, uiListElement.listContent, false);
-								uiListElement?.AddComponent(dropDown);
-							}
-							else //When it's an internal object in the form
-							{
-								UIObject uiObjectInstance = uiFactory?.CreateUI<UIObject>(uiObjectPrefab, itemName, uiListElement.listContent);
-
-								uiListElement?.AddComponent(uiObjectInstance);
-
-								ConvertObjectToFormUIs(item, uiObjectInstance.rectTransform, false);
-
-								uiObjectInstance?.EnableDeleteButton();
-							}
+							ProcessObjectField(item, itemName, listElementType, uiListElement.listContent);
 
 							//ConvertObjectToFormUIs(item, uiListElement.listContent, false);
-
 							//if (uiTextFieldListElement != null)
 							//{
 							//	uiTextFieldListElement.EnableDeleteButton();
 							//}
-
 							//uiListElement.AddComponent(uiTextFieldListElement);
 						}
 					}
@@ -249,6 +232,39 @@ namespace O2F
 						uiFormInstance?.AddUIComponent(uiListElement);
 					}
 				}
+			}
+		}
+
+		private void ProcessObjectField(object item, string fieldName, Type objectType, RectTransform parent)
+		{
+			Type typeBinder = TypeUIComponentBinder.GetTypeBySystemType(objectType);
+
+			if (typeBinder == typeof(UITextField))
+			{
+				UITextField uiTextFieldListElement = uiFactory?.CreateUI<UITextField>(uiTextFieldPrefab,
+					fieldName, item.ToString(), parent);
+
+				//uiListElement?.AddComponent(uiTextFieldListElement);
+
+				uiTextFieldListElement?.EnableDeleteButton();
+			}
+			else if (typeBinder == typeof(UICheckBox))
+			{
+			}
+			else if (objectType.IsEnum)
+			{
+				UIDropDown dropDown = CreateUIDropDown(item?.GetType(), item?.ToString(), fieldName, item, parent, false);
+				//uiListElement?.AddComponent(dropDown);
+			}
+			else //When it's an internal object in the form
+			{
+				UIObject uiObjectInstance = uiFactory?.CreateUI<UIObject>(uiObjectPrefab, fieldName, parent);
+
+				//uiListElement?.AddComponent(uiObjectInstance);
+
+				ConvertObjectToFormUIs(item, uiObjectInstance.rectTransform, false);
+
+				uiObjectInstance?.EnableDeleteButton();
 			}
 		}
 

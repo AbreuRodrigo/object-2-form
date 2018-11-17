@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using O2F;
 
@@ -10,6 +11,7 @@ public enum CharacterClass
 	Priest
 }
 
+[Serializable]
 public class Player
 {
 	[TextField(ETextFieldType.String, true)]
@@ -39,6 +41,6 @@ public class Player
 	[CheckBox]
 	public bool isAlive;
 
-	[ListElement]
+	[ListElement(true)]
 	public List<Item> items = new List<Item>();
 }
